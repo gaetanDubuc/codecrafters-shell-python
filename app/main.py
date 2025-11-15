@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import sys
 
@@ -9,9 +10,21 @@ class Command:
         self.args = args
 
     def from_string(cmd: str) -> "Command":
-        parsed_cmd = cmd.split(" ")
-        func = parsed_cmd[0]
-        args = parsed_cmd[1:]
+        # Extract quoted chunks or standalone words
+        parts = []
+        pattern = re.finditer(r"'([^']*)'|(\S+)", cmd)
+        for match in pattern:
+            if match.group(1) is not None:
+                parts.append(match.group(1))
+            else:
+                parts.append(match.group(2))
+        # If the command ends with a trailing space, append an empty argument
+        if cmd.endswith(" "):
+            parts.append("")
+        if not parts:
+            return Command("", [])
+        func = parts[0]
+        args = parts[1:]
         return Command(func, args)
 
 
