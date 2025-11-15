@@ -57,7 +57,6 @@ def cd(path: str) -> None:
     if not os.path.isdir(path):
         return f"cd: {path}: No such file or directory"
     os.chdir(path)
-    return ""
 
 
 class Evaluator:
@@ -92,6 +91,8 @@ class Evaluator:
 
 
 def print_result(result: str) -> None:
+    if result is None:
+        return
     if result.endswith("\n"):
         print(result, end="")
     print(result)
