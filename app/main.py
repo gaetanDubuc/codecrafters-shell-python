@@ -20,6 +20,8 @@ def read() -> Command:
 
 
 def exit_func(code: int) -> None:
+    if isinstance(code, str):
+        code = int(code)
     sys.exit(code)
 
 
