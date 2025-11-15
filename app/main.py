@@ -25,7 +25,11 @@ def exit_func(code: int) -> None:
     sys.exit(code)
 
 
-known_cmds = {"exit": exit_func}
+def echo(*args: str) -> str:
+    return " ".join(args)
+
+
+known_cmds = {"exit": exit_func, "echo": echo}
 
 
 def eval_command(cmd: Command) -> str:
