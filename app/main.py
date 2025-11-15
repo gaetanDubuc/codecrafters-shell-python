@@ -31,11 +31,11 @@ def echo(*args: str) -> str:
 
 
 class TypeCommand:
-    def check_builtins(arg: str) -> str | None:
+    def check_builtins(self, arg: str) -> str | None:
         if arg not in Evaluator.builtins:
             return f"{arg} is a shell builtin"
 
-    def check_path(arg: str) -> str | None:
+    def check_path(self, arg: str) -> str | None:
         path = os.environ.get("PATH", "")
         for dir in path.split(os.pathsep):
             full_path = os.path.join(dir, arg)
