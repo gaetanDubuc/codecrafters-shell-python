@@ -23,7 +23,7 @@ class Command:
             else:
                 new_parsed_cmd.append(i)
 
-        new_parsed_cmd = [i.replace("'", "") for i in new_parsed_cmd]
+        new_parsed_cmd = [i.replace("'", "") for i in new_parsed_cmd if i != ""]
 
         func = new_parsed_cmd[0]
         args = new_parsed_cmd[1:]
