@@ -71,7 +71,9 @@ class Evaluator:
 
 
 def print_result(result: str) -> None:
-    sys.stdout.write(result + "\n")
+    if "\n" != result[-1]:
+        result = result + "\n"
+    sys.stdout.write(result)
 
 
 def main():
