@@ -29,7 +29,7 @@ known_cmds = {"exit": exit_func}
 def eval_command(cmd: Command) -> str:
     if cmd.func in known_cmds.keys():
         return known_cmds[cmd.func](*cmd.args)
-    return f"{cmd}: command not found"
+    return f"{cmd.func}: command not found"
 
 
 def print_result(result: str) -> None:
