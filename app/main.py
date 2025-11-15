@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 
 
@@ -30,37 +31,43 @@ def echo(*args: str) -> str:
     return " ".join(args)
 
 
-class TypeCommand:
-    def check_builtins(self, arg: str) -> str | None:
-        if arg in Evaluator.builtins:
-            return f"{arg} is a shell builtin"
+def type_func(*args: str) -> str:
+    arg = args[0]
+    if arg in Evaluator.builtins:
+        return f"{arg} is a shell builtin"
+    full_path = check_path(arg)
+    if full_path:
+        return f"{arg} is {full_path}"
+    return f"{arg}: not found"
 
-    def check_path(self, arg: str) -> str | None:
-        path = os.environ.get("PATH", "")
-        for dir in path.split(os.pathsep):
-            full_path = os.path.join(dir, arg)
-            if os.path.isfile(full_path) and os.access(full_path, os.X_OK):
-                return f"{arg} is {full_path}"
 
-    def __call__(self, *args: os.Any, **kwds: os.Any) -> os.Any:
-        arg = args[0]
-        result = self.check_builtins(arg)
-        if result:
-            return result
-        result = self.check_path(arg)
-        if result:
-            return result
-        return f"{arg}: not found"
+def check_path(cmd: str) -> str | None:
+    path = os.environ.get("PATH", "")
+    for dir in path.split(os.pathsep):
+        full_path = os.path.join(dir, cmd)
+        if os.path.isfile(full_path) and os.access(full_path, os.X_OK):
+            return full_path
 
 
 class Evaluator:
-    builtins = {"exit": exit_func, "echo": echo, "type": TypeCommand()}
+    builtins = {"exit": exit_func, "echo": echo, "type": type_func}
 
     def eval(self, cmd: Command) -> str:
         if cmd.func in self.builtins:
             func = self.builtins[cmd.func]
             return func(*cmd.args)
+
+        result = self.eval_program(cmd)
+        if result is not None:
+            return result
         return f"{cmd.func}: command not found"
+
+    def eval_program(self, cmd: Command) -> str | None:
+        full_path = check_path(cmd.func)
+        if full_path:
+            result = subprocess.run([cmd.func] + cmd.args, capture_output=True)
+            return result.stdout.decode()
+        return None
 
 
 def print_result(result: str) -> None:
