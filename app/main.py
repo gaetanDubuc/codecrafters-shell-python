@@ -53,8 +53,21 @@ def pwd():
     return os.getcwd()
 
 
+def cd(path: str) -> None:
+    if not os.path.isdir(path):
+        return f"cd: {path}: No such file or directory"
+    os.chdir(path)
+    return ""
+
+
 class Evaluator:
-    builtins = {"exit": exit_func, "echo": echo, "type": type_func, "pwd": pwd}
+    builtins = {
+        "exit": exit_func,
+        "echo": echo,
+        "type": type_func,
+        "pwd": pwd,
+        "cd": cd,
+    }
 
     def eval(self, cmd: Command) -> str:
         if cmd.func in self.builtins:
@@ -69,15 +82,19 @@ class Evaluator:
     def eval_program(self, cmd: Command) -> str | None:
         full_path = check_path(cmd.func)
         if full_path:
-            result = subprocess.run([cmd.func] + cmd.args, capture_output=True)
+            result = subprocess.run(
+                [cmd.func] + cmd.args,
+                stdout=subprocess.STDOUT,
+                stderr=subprocess.STDOUT,
+            )
             return result.stdout.decode()
         return None
 
 
 def print_result(result: str) -> None:
-    if "\n" != result[-1]:
-        result = result + "\n"
-    sys.stdout.write(result)
+    if result.endswith("\n"):
+        print(result, end="")
+    print(result)
 
 
 def main():
