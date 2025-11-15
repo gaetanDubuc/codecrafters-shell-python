@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+from shlex import split
 
 
 class Command:
@@ -9,24 +10,10 @@ class Command:
         self.args = args
 
     def from_string(cmd: str) -> "Command":
-        parsed_cmd = cmd.split(" ")
-        join = False
-        new_parsed_cmd = []
-        for i in parsed_cmd:
-            if join:
-                new_parsed_cmd[-1] += " " + i
-                if i.endswith("'"):
-                    join = False
-            elif i.startswith("'") and not i.endswith("'"):
-                join = True
-                new_parsed_cmd.append(i)
-            else:
-                new_parsed_cmd.append(i)
+        parsed_cmd = split(cmd)
 
-        new_parsed_cmd = [i.replace("'", "") for i in new_parsed_cmd if i != ""]
-
-        func = new_parsed_cmd[0]
-        args = new_parsed_cmd[1:]
+        func = parsed_cmd[0]
+        args = parsed_cmd[1:]
         return Command(func, args)
 
 
