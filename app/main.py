@@ -84,7 +84,6 @@ class Evaluator:
             result = subprocess.run(
                 [cmd.func] + cmd.args,
                 stdout=subprocess.STDOUT,
-                stderr=subprocess.PIPE,
             )
             return result.stdout.decode()
         return None
