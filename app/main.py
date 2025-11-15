@@ -54,6 +54,7 @@ def pwd():
 
 
 def cd(path: str) -> None:
+    path = os.path.expanduser(path)
     if not os.path.isdir(path):
         return f"cd: {path}: No such file or directory"
     os.chdir(path)
