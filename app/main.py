@@ -82,8 +82,7 @@ class Evaluator:
         full_path = check_path(cmd.func)
         if full_path:
             result = subprocess.run(
-                [cmd.func] + cmd.args,
-                stdout=subprocess.STDOUT,
+                [cmd.func] + cmd.args, stdout=sys.stdout, stderr=sys.stderr
             )
             return result.stdout.decode()
         return None
