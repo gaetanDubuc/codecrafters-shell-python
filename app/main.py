@@ -32,7 +32,7 @@ def echo(*args: str) -> str:
 
 class TypeCommand:
     def check_builtins(self, arg: str) -> str | None:
-        if arg not in Evaluator.builtins:
+        if arg in Evaluator.builtins:
             return f"{arg} is a shell builtin"
 
     def check_path(self, arg: str) -> str | None:
