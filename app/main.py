@@ -1,3 +1,4 @@
+import os
 import sys
 
 
@@ -29,14 +30,31 @@ def echo(*args: str) -> str:
     return " ".join(args)
 
 
-def type_func(arg: str) -> str:
-    if arg in Evaluator.builtins:
-        return f"{arg} is a shell builtin"
-    return f"{arg}: not found"
+class TypeCommand:
+    def check_builtins(arg: str) -> str | None:
+        if arg not in Evaluator.builtins:
+            return f"{arg} is a shell builtin"
+
+    def check_path(arg: str) -> str | None:
+        path = os.environ.get("PATH", "")
+        for dir in path.split(os.pathsep):
+            full_path = os.path.join(dir, arg)
+            if os.path.isfile(full_path) and os.access(full_path, os.X_OK):
+                return f"{arg} is {full_path}"
+
+    def __call__(self, *args: os.Any, **kwds: os.Any) -> os.Any:
+        arg = args[0]
+        result = self.check_builtins(arg)
+        if result:
+            return result
+        result = self.check_path(arg)
+        if result:
+            return result
+        return f"{arg}: not found"
 
 
 class Evaluator:
-    builtins = {"exit": exit_func, "echo": echo, "type": type_func}
+    builtins = {"exit": exit_func, "echo": echo, "type": TypeCommand()}
 
     def eval(self, cmd: Command) -> str:
         if cmd.func in self.builtins:
