@@ -29,13 +29,20 @@ def echo(*args: str) -> str:
     return " ".join(args)
 
 
-known_cmds = {"exit": exit_func, "echo": echo}
+def type_func(arg: str) -> str:
+    if arg in Evaluator.builtins:
+        return f"{arg} is a shell builtin"
+    return f"{arg}: not found"
 
 
-def eval_command(cmd: Command) -> str:
-    if cmd.func in known_cmds.keys():
-        return known_cmds[cmd.func](*cmd.args)
-    return f"{cmd.func}: command not found"
+class Evaluator:
+    builtins = {"exit": exit_func, "echo": echo, "type": type_func}
+
+    def eval(self, cmd: Command) -> str:
+        if cmd.func in self.builtins:
+            func = self.builtins[cmd.func]
+            return func(*cmd.args)
+        return f"{cmd.func}: command not found"
 
 
 def print_result(result: str) -> None:
@@ -44,9 +51,10 @@ def print_result(result: str) -> None:
 
 def main():
     # TODO: Uncomment the code below to pass the first stage
+    evaluator = Evaluator()
     while True:
         cmd = read()
-        result = eval_command(cmd)
+        result = evaluator.eval(cmd)
         print_result(result)
 
 
