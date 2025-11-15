@@ -1,17 +1,34 @@
 import sys
 
 
-def read() -> str:
+class Command:
+    def __init__(self, func: str, args: list[str]) -> None:
+        self.func = func
+        self.args = args
+
+    def from_string(cmd: str) -> "Command":
+        parsed_cmd = cmd.split(" ")
+        func = parsed_cmd[0]
+        args = parsed_cmd[1:]
+        return Command(func, args)
+
+
+def read() -> Command:
     sys.stdout.write("$ ")
-    return input()
+    cmd = Command.from_string(input())
+    return cmd
 
 
-known_cmds = {}
+def exit_func(code: int) -> None:
+    sys.exit(code)
 
 
-def eval_command(cmd: str) -> str:
-    if cmd in known_cmds:
-        return ""
+known_cmds = {"exit": exit_func}
+
+
+def eval_command(cmd: Command) -> str:
+    if cmd.func in known_cmds.keys():
+        return known_cmds[cmd.func](*cmd.args)
     return f"{cmd}: command not found"
 
 
