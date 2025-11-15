@@ -49,8 +49,12 @@ def check_path(cmd: str) -> str | None:
             return full_path
 
 
+def pwd():
+    return os.getcwd()
+
+
 class Evaluator:
-    builtins = {"exit": exit_func, "echo": echo, "type": type_func}
+    builtins = {"exit": exit_func, "echo": echo, "type": type_func, "pwd": pwd}
 
     def eval(self, cmd: Command) -> str:
         if cmd.func in self.builtins:
