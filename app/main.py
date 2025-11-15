@@ -74,18 +74,20 @@ class Evaluator:
             return func(*cmd.args)
 
         result = self.eval_program(cmd)
-        if result is not None:
-            return result
+        if result:
+            return None
         return f"{cmd.func}: command not found"
 
-    def eval_program(self, cmd: Command) -> str | None:
+    def eval_program(self, cmd: Command) -> bool:
         full_path = check_path(cmd.func)
         if full_path:
-            result = subprocess.run(
-                [cmd.func] + cmd.args, stdout=sys.stdout, stderr=sys.stderr
+            subprocess.run(
+                [cmd.func] + cmd.args,
+                stdout=sys.stdout,
+                stderr=sys.stderr,
             )
-            return result.stdout.decode()
-        return None
+            return True
+        return False
 
 
 def print_result(result: str) -> None:
