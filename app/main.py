@@ -121,7 +121,8 @@ def main():
         try:
             result = evaluator.eval(cmd)
         finally:
-            cmd.output_file.close()
+            if cmd.redirection:
+                cmd.output_file.close()
         print_result(result)
 
 
