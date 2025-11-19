@@ -120,9 +120,9 @@ def main():
         cmd = read()
         try:
             result = evaluator.eval(cmd)
-            print_result(result)
         finally:
             cmd.output_file.close()
+        print_result(result)
 
 
 if __name__ == "__main__":
