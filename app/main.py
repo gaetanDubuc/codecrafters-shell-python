@@ -1,25 +1,39 @@
 import os
 import subprocess
 import sys
+from dataclasses import dataclass
 from shlex import split
+from typing import TextIO
 
 
+@dataclass
 class Command:
-    def __init__(self, func: str, args: list[str]) -> None:
-        self.func = func
-        self.args = args
+    func: str
+    args: list[str]
+    redirection: bool = False
+    output_file: TextIO = sys.stdout
 
-    def from_string(cmd: str) -> "Command":
+    @classmethod
+    def from_string(cls, cmd: str) -> "Command":
         parsed_cmd = split(cmd)
 
         func = parsed_cmd[0]
         args = parsed_cmd[1:]
-        return Command(func, args)
+
+        redirection = False
+        output_file = sys.stdout
+        if ">" in args:
+            redir_index = args.index(">")
+            redirection = True
+            output_file: TextIO = open(args[redir_index + 1], "w")
+            args = args[:redir_index]
+        return Command(func, args, redirection, output_file)
 
 
 def read() -> Command:
     sys.stdout.write("$ ")
     cmd = Command.from_string(input())
+    print(cmd)
     return cmd
 
 
@@ -55,7 +69,7 @@ def pwd():
     return os.getcwd()
 
 
-def cd(path: str) -> None:
+def cd(path: str) -> str | None:
     path = os.path.expanduser(path)
     if not os.path.isdir(path):
         return f"cd: {path}: No such file or directory"
@@ -71,7 +85,7 @@ class Evaluator:
         "cd": cd,
     }
 
-    def eval(self, cmd: Command) -> str:
+    def eval(self, cmd: Command) -> str | None:
         if cmd.func in self.builtins:
             func = self.builtins[cmd.func]
             return func(*cmd.args)
@@ -86,14 +100,14 @@ class Evaluator:
         if full_path:
             subprocess.run(
                 [cmd.func] + cmd.args,
-                stdout=sys.stdout,
+                stdout=cmd.output_file,
                 stderr=sys.stderr,
             )
             return True
         return False
 
 
-def print_result(result: str) -> None:
+def print_result(result: str | None) -> None:
     if result is None:
         return
     if result.endswith("\n"):
@@ -102,12 +116,14 @@ def print_result(result: str) -> None:
 
 
 def main():
-    # TODO: Uncomment the code below to pass the first stage
     evaluator = Evaluator()
     while True:
         cmd = read()
-        result = evaluator.eval(cmd)
-        print_result(result)
+        try:
+            result = evaluator.eval(cmd)
+            print_result(result)
+        finally:
+            cmd.output_file.close()
 
 
 if __name__ == "__main__":
