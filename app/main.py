@@ -33,7 +33,6 @@ class Command:
 def read() -> Command:
     sys.stdout.write("$ ")
     cmd = Command.from_string(input())
-    print(cmd)
     return cmd
 
 
