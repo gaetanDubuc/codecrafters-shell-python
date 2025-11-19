@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -22,10 +23,12 @@ class Command:
 
         redirection = False
         output_file = sys.stdout
-        if ">" in args:
-            redir_index = args.index(">")
+        redir_pattern = re.compile(r"^\d*>>?$")
+
+        if any(redir_pattern.match(arg) for arg in args):
+            redir_index = next(i for i, a in enumerate(args) if redir_pattern.match(a))
             redirection = True
-            output_file: TextIO = open(args[redir_index + 1], "w")
+            output_file = open(args[redir_index + 1], "w")
             args = args[:redir_index]
         return Command(func, args, redirection, output_file)
 
@@ -106,12 +109,12 @@ class Evaluator:
         return False
 
 
-def print_result(result: str | None) -> None:
+def print_result(result: str | None, file: TextIO | None = None) -> None:
     if result is None:
         return
     if result.endswith("\n"):
-        print(result, end="")
-    print(result)
+        print(result, file=file, end="")
+    print(result, file=file)
 
 
 def main():
@@ -120,10 +123,10 @@ def main():
         cmd = read()
         try:
             result = evaluator.eval(cmd)
+            print_result(result, cmd.output_file)
         finally:
             if cmd.redirection:
                 cmd.output_file.close()
-        print_result(result)
 
 
 if __name__ == "__main__":
